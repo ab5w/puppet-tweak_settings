@@ -21,31 +21,31 @@
 #
 #
 
+function usage() {
+  echo "Usage: $0 <variable> <value>"
+}
+
 if [ $# -ne 2 ]; then
-
-    exit 0
-
+  echo "ERROR: Incorrect number of arguments (expecting 2)"
+  usage && exit 0
 fi
 
-name=$1
-value=$2
+variable="$1"
+value="$2"
 
 cpconfig="/var/cpanel/cpanel.config";
 
-if ! $(grep $name $cpconfig > /dev/null); then
-
-    echo "$name=$value" >> $cpconfig;
-    `head /var/cpanel/cpanel.config | awk -F"'" '/whostmgr/ {print $2}'`
-
-elif $(grep $name $cpconfig > /dev/null); then
-
-    cvalue=$(grep $name $cpconfig | awk -F= '{print $2}');
-
-    if ! [ $cvalue == $value ]; then
-
-        sed -i "s/$cvalue/$value/" $cpconfig;
-        `head /var/cpanel/cpanel.config | awk -F"'" '/whostmgr/ {print $2}'`
-
-    fi
-
+if ! grep -qE '^\s*'"$variable"'\s*=' $cpconfig; then
+  # Variable not yet defined - add it
+  echo "$variable=$value" >> $cpconfig
+  $( awk -F\' '/^\s*#.*whostmgr/ {print $2}' $cpconfig | head -n 1 )
+elif grep -qE '^\s*'"$variable"'\s*=' $cpconfig; then
+  # Variable already defined - replace if different from current
+  cvalue=$( awk -F= '/^\s*'"$variable"'\s*=/ {print $2}' $cpconfig | head -n 1 )
+  if [ "$cvalue" != "$value" ]; then
+    sed -i '/^\s*'"$variable"'\s*=/d' $cpconfig
+    echo "$variable=$value" >> $cpconfig
+    $( awk -F\' '/^\s*#.*whostmgr/ {print $2}' $cpconfig | head -n 1 )
+  fi
 fi
+
