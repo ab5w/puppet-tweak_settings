@@ -24,7 +24,11 @@
 #   along with this program; If not, see <http://www.gnu.org/licenses/>.
 #
 #
-define tweak_settings ( $value ) {
+define tweak_settings ( $value = 'setme' ) {
+
+    if $value == 'setme' {
+        fail('Please ensure a value is set.')
+    }
 
     file { '/usr/sbin/tweaksettings':
         ensure => file,
