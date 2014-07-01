@@ -35,7 +35,7 @@ cpconfig="/var/cpanel/cpanel.config";
 if ! grep -qE '^\s*'"$name"'\s*=' $cpconfig; then
 
     echo "$name=$value" >> $cpconfig;
-    `head /var/cpanel/cpanel.config | awk -F"'" '/whostmgr/ {print $2}'`
+    `head $cpconfig | awk -F"'" '/whostmgr/ {print $2}'`
 
 elif grep -qE '^\s*'"$name"'\s*=' $cpconfig; then
 
@@ -44,7 +44,7 @@ elif grep -qE '^\s*'"$name"'\s*=' $cpconfig; then
     if ! [ "$cvalue" == "$value" ]; then
 
         sed -i '/^\s*'"$name"'\s*=/s/'"$cvalue"'/'"$value"'/' $cpconfig
-        `head /var/cpanel/cpanel.config | awk -F"'" '/whostmgr/ {print $2}'`
+        `head $cpconfig | awk -F"'" '/whostmgr/ {print $2}'`
 
     fi
 
