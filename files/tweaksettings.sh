@@ -32,19 +32,19 @@ value=$2
 
 cpconfig="/var/cpanel/cpanel.config";
 
-if ! $(grep $name $cpconfig > /dev/null); then
+if ! grep -qE '^\s*'"$name"'\s*=' $cpconfig; then
 
     echo "$name=$value" >> $cpconfig;
-    `head /var/cpanel/cpanel.config | awk -F"'" '/whostmgr/ {print $2}'`
+    `head $cpconfig | awk -F"'" '/whostmgr/ {print $2}'`
 
-elif $(grep $name $cpconfig > /dev/null); then
+elif grep -qE '^\s*'"$name"'\s*=' $cpconfig; then
 
-    cvalue=$(grep $name $cpconfig | awk -F= '{print $2}');
+    cvalue=$(awk -F= '/^\s*'"$name"'\s*=/ {print $2}' $cpconfig | head -n 1)
 
-    if ! [ $cvalue == $value ]; then
+    if ! [ "$cvalue" == "$value" ]; then
 
-        sed -i "s/$cvalue/$value/" $cpconfig;
-        `head /var/cpanel/cpanel.config | awk -F"'" '/whostmgr/ {print $2}'`
+        sed -i '/^\s*'"$name"'\s*=/s/'"$cvalue"'/'"$value"'/' $cpconfig
+        `head $cpconfig | awk -F"'" '/whostmgr/ {print $2}'`
 
     fi
 
